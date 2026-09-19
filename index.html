@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G-CI — Comparative Index of Greenness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#14532d; --green-2:#1d6b3c; --green-3:#2f7a4f; --green-4:#7fb894; --green-5:#c7e3d1;
+  --grey:#dfe3e0; --ink:#132018; --muted:#6b7f73; --line:#e6ece8; --bg:#f4f7f5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.hero{background:var(--green);color:#fff;padding:2.2rem 1.5rem 2.4rem}
+.hero .inner{max-width:1440px;margin:0 auto}
+.hero h1{margin:0;font-family:'Playfair Display',Georgia,serif;font-size:2rem;font-weight:700;letter-spacing:.01em}
+.hero .kick{font-size:.72rem;font-weight:700;letter-spacing:.22em;opacity:.8;margin-bottom:.5rem}
+.hero p{margin-top:.4rem;margin-bottom:0;font-size:.95rem;font-weight:700;color:#d8e8de}
+.wrap{max-width:1440px;margin:0 auto;padding:1.6rem 1.5rem 3rem;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:1.6rem;align-items:start}
+@media(max-width:1180px){.wrap{grid-template-columns:minmax(0,1fr)}}
+
+.qtable{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:1.1rem}
+.qghead{background:var(--green);color:#fff;padding:.8rem 1.1rem;font-size:.95rem;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.qghead .sub{font-size:.75rem;font-weight:500;opacity:.85;letter-spacing:.04em}
+.qrow{display:flex;gap:1rem;align-items:flex-start;padding:.95rem 1.1rem;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0}
+.qnum{flex:0 0 26px;height:26px;border-radius:50%;background:#eef4f0;color:var(--green);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:.15rem}
+.qtext{flex:1 1 auto;min-width:0}
+.qtext .t{font-size:.94rem;font-weight:600;line-height:1.35}
+.qtext .h{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.45}
+.qpts{font-size:.74rem;font-weight:700;color:var(--muted);margin-left:.35rem}
+.qanswer{flex:0 0 340px;max-width:340px;position:relative}
+@media(max-width:760px){.qrow{flex-wrap:wrap}.qanswer{flex:1 1 100%;max-width:100%}}
+
+.dd{width:100%;text-align:left;background:#fff;border:1px solid #d7e0da;border-radius:10px;padding:.6rem .8rem;font:inherit;font-size:.86rem;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;gap:.6rem;align-items:center;min-height:44px}
+.dd:hover{border-color:var(--green-4)}
+.dd[aria-expanded="true"]{border-color:var(--green);box-shadow:0 0 0 3px rgba(20,83,45,.1)}
+.dd .lbl{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dd .ph{color:#9aa8a0}
+.dd .car{flex:0 0 auto;color:var(--muted);font-size:.7rem}
+.ddmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #d7e0da;border-radius:10px;box-shadow:0 12px 30px rgba(19,32,24,.14);padding:.3rem;display:none;max-height:320px;overflow:auto}
+.ddmenu.open{display:block}
+.ddopt{width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:.55rem .6rem;font:inherit;font-size:.86rem;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start}
+.ddopt:hover{background:#f0f6f2}
+.ddopt .p{flex:0 0 auto;font-weight:700;color:var(--green)}
+.ddopt[aria-selected="true"]{background:#eef4f0;font-weight:600}
+
+.side{position:sticky;top:1.2rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem}
+.card svg{width:100%;height:auto;cursor:pointer;display:block}
+.hint{text-align:center;font-size:.76rem;color:var(--muted);margin-top:.5rem}
+.meter{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--line)}
+.meter b{color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:.6rem 1rem;justify-content:center;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--line)}
+.legend span{display:flex;align-items:center;gap:.35rem;font-size:.76rem;color:var(--ink)}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.reset{margin-top:.8rem;width:100%;background:#fff;border:1px solid #d7e0da;border-radius:10px;padding:.6rem;font:inherit;font-size:.82rem;color:var(--muted);cursor:pointer;min-height:44px}
+.reset:hover{border-color:var(--green-4);color:var(--green)}
+.qfoot{background:var(--green);color:#d8e8de;text-align:center;font-size:.8rem;padding:.7rem 1rem}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:#fff;padding:.7rem 1.1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="inner">
+    <div class="kick">100-POINT MODEL</div>
+    <h1>Comparative Index of Greenness (G-CI)</h1>
+    <p>G-CI — ten equally weighted criteria (100 points) with ±2 adjustments</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <div id="questions"></div>
+    <div class="qtable">
+      <div class="qfoot" style="border-bottom:1px solid #0e3c20">This application is for research purposes.</div>
+      <div class="qfoot">For any inquiries, please consult Prof. Heba Shaaban.</div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="card">
+      <div id="wheel"></div>
+      <div class="hint">Click the image to download it as a PNG</div>
+      <div class="meter"><span>Criteria answered</span><span><b id="answered">0</b> / 10</span></div>
+      <div class="meter" style="border-top:0;padding-top:0"><span>Adjustments</span><span><b id="adj">0</b></span></div>
+      <div class="legend">
+        <span><i style="background:#14532d"></i>10</span>
+        <span><i style="background:#2f7a4f"></i>8</span>
+        <span><i style="background:#7fb894"></i>5</span>
+        <span><i style="background:#c7e3d1"></i>2</span>
+        <span><i style="background:#dfe3e0"></i>0</span>
+      </div>
+      <button class="reset" id="reset" type="button">Reset all answers</button>
+    </div>
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- data ---------- */
+const QS=[
+ {n:1,t:"Type of analytical method",s:"Method type",o:[
+   ["Non-instrumental detection / smartphone-based",10],
+   ["Instrumental, &lt;0.1 kWh per sample",8],
+   ["Instrumental, ≤1.5 kWh per sample",5],
+   ["Instrumental, equal to or greater than 1.5 kWh per sample",2]]},
+ {n:2,t:"Extraction technique",s:"Extraction",o:[
+   ["No extraction",10],["Nanoextraction",8],["Microextraction",5],["Macroextraction",2]]},
+ {n:3,t:"Pre-steps (synthesis / pretreatment)",s:"Pre-steps",o:[
+   ["Not required",10],
+   ["Eco-conditions: room temperature, time &lt;1 h",8],
+   ["Mild conditions: room temperature time &gt;1 h, heating time &lt;1 h, or cooling to 0 °C",5],
+   ["Harsh conditions: heating time &gt;1 h, or cooling &lt;0 °C",2]]},
+ {n:4,t:"Sample size (mg or µL)",s:"Sample size",o:[
+   ["&lt;1",10],["1–10",8],["10–100",5],["100–1000",2],["&gt;1000",0]]},
+ {n:5,t:"Solvent sustainability",s:"Solvent",
+   h:"Total score for (hazard of all utilized solvents and reagents × volume factor). Volume factor: &lt;1 mL ×0.1 · 1–10 mL ×1 · 10–100 mL ×1.5 · &gt;100 mL ×2",o:[
+   ["Total 0–5",10],["Total 6–10",8],["Total 11–20",5],["Total &gt;20",2]]},
+ {n:6,t:"Total waste generated",s:"Waste",o:[
+   ["&lt;1 mL",10],["1–10 mL",8],["11–50 mL",5],["50–100 mL",2],["&gt;100 mL",0]]},
+ {n:7,t:"Waste treatment",s:"Treatment",o:[
+   ["Proper treatment / recycling",10],["No treatment",0]]},
+ {n:8,t:"Operator safety &amp; emissions",s:"Safety",o:[
+   ["No hazard",10],["High hazard",0]]},
+ {n:9,t:"Throughput",s:"Throughput",o:[
+   ["High throughput: more than 25 samples/hr",10],
+   ["Moderate throughput: 13–25 samples/hr",5],
+   ["Low throughput: less than 12 samples/hr",2]]},
+ {n:10,t:"Automation",s:"Automation",o:[
+   ["Automated",10],["Semi-automated",8],["Manual",5]]}
+];
+const MODS=[
+ {n:1,t:"Derivatization of the sample",o:[["Required",-2],["Not required",0]]},
+ {n:2,t:"In-situ analysis",o:[["No",-2],["Yes",0]]},
+ {n:3,t:"Use of bio-source / plant-based materials",o:[["Yes",2],["No",0]]},
+ {n:4,t:"Use of optimization strategies (DOE, AQbD)",o:[["Yes",2],["No",0]]},
+ {n:5,t:"Multi-analyte or multi-parameter",o:[["Yes",2],["No",0]]}
+];
+
+const ans={}, mans={};
+
+/* ---------- question table ---------- */
+function optRow(kind,i,oi,label,pts){
+  const sign = kind==='m' ? (pts>0?'+'+pts:String(pts)) : String(pts);
+  return '<button class="ddopt" type="button" role="option" data-kind="'+kind+'" data-i="'+i+'" data-oi="'+oi+'"><span>'+label+'</span><span class="p">'+sign+'</span></button>';
+}
+function control(kind,i,list){
+  let m='';
+  list.forEach((o,oi)=>{ m+=optRow(kind,i,oi,o[0],o[1]); });
+  return '<div class="qanswer">'+
+    '<button class="dd" type="button" id="dd-'+kind+'-'+i+'" aria-expanded="false" aria-haspopup="listbox">'+
+      '<span class="lbl ph">— Select —</span><span class="car">▼</span></button>'+
+    '<div class="ddmenu" id="menu-'+kind+'-'+i+'" role="listbox">'+m+'</div></div>';
+}
+function build(){
+  let h='<div class="qtable">'+
+    '<div class="qghead"><span>Scoring criteria</span><span class="sub">100 POINTS · 10 POINTS EACH</span></div>';
+  QS.forEach((q,i)=>{
+    h+='<div class="qrow"><div class="qnum">'+q.n+'</div><div class="qtext">'+
+       '<div class="t">'+q.t+'<span class="qpts">(10)</span></div>'+
+       (q.h?'<div class="h">'+q.h+'</div>':'')+
+       '</div>'+control('q',i,q.o)+'</div>';
+  });
+  h+='</div>';
+  h+='<div class="qtable">'+
+    '<div class="qghead"><span>Adjustments</span><span class="sub">±2 EACH</span></div>';
+  MODS.forEach((m,i)=>{
+    h+='<div class="qrow"><div class="qnum">'+m.n+'</div><div class="qtext">'+
+       '<div class="t">'+m.t+'</div></div>'+control('m',i,m.o)+'</div>';
+  });
+  h+='</div>';
+  document.getElementById('questions').innerHTML=h;
+}
+
+/* ---------- dropdown behaviour ---------- */
+function closeMenus(except){
+  document.querySelectorAll('.ddmenu.open').forEach(m=>{
+    if(m!==except){ m.classList.remove('open'); const b=document.getElementById(m.id.replace('menu-','dd-')); if(b) b.setAttribute('aria-expanded','false'); }
+  });
+}
+document.addEventListener('click',e=>{
+  const trig=e.target.closest('.dd');
+  if(trig){
+    const menu=document.getElementById(trig.id.replace('dd-','menu-'));
+    const open=menu.classList.contains('open');
+    closeMenus(menu);
+    menu.classList.toggle('open',!open);
+    trig.setAttribute('aria-expanded',String(!open));
+    return;
+  }
+  const opt=e.target.closest('.ddopt');
+  if(opt){
+    const kind=opt.dataset.kind, i=+opt.dataset.i, oi=+opt.dataset.oi;
+    const list=(kind==='q'?QS[i].o:MODS[i].o);
+    (kind==='q'?ans:mans)[i]=list[oi][1];
+    const btn=document.getElementById('dd-'+kind+'-'+i);
+    btn.querySelector('.lbl').innerHTML=list[oi][0];
+    btn.querySelector('.lbl').classList.remove('ph');
+    opt.parentElement.querySelectorAll('.ddopt').forEach(o=>o.setAttribute('aria-selected','false'));
+    opt.setAttribute('aria-selected','true');
+    closeMenus(null);
+    draw();
+    return;
+  }
+  closeMenus(null);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenus(null); });
+
+/* ---------- score ---------- */
+function totals(){
+  let raw=0, answered=0;
+  QS.forEach((q,i)=>{ if(ans[i]!==undefined){ raw+=ans[i]; answered++; } });
+  let adj=0;
+  MODS.forEach((m,i)=>{ if(mans[i]!==undefined) adj+=mans[i]; });
+  const score=Math.max(0,Math.min(100,raw+adj));
+  return {raw:raw,adj:adj,answered:answered,score:score};
+}
+
+/* ---------- wheel ---------- */
+/*WHEEL_START*/
+function wheelSVG(ans,mans,QS,MODS,t){
+  const W=700,H=620,CX=350,CY=300,R0=112,R1=222,GAP=1.4;
+  const rad=a=>a*Math.PI/180;
+  const fill=s=>s===undefined?'#dfe3e0':(s===10?'#14532d':s>=8?'#2f7a4f':s>=5?'#7fb894':s>=2?'#c7e3d1':'#dfe3e0');
+  let p='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+
+        '<rect width="'+W+'" height="'+H+'" fill="#ffffff"/>';
+  for(let i=0;i<10;i++){
+    const a0=-90+i*36+GAP, a1=-90+(i+1)*36-GAP, am=(a0+a1)/2;
+    const x0=CX+R1*Math.cos(rad(a0)), y0=CY+R1*Math.sin(rad(a0));
+    const x1=CX+R1*Math.cos(rad(a1)), y1=CY+R1*Math.sin(rad(a1));
+    const x2=CX+R0*Math.cos(rad(a1)), y2=CY+R0*Math.sin(rad(a1));
+    const x3=CX+R0*Math.cos(rad(a0)), y3=CY+R0*Math.sin(rad(a0));
+    p+='<path d="M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+R1+' '+R1+' 0 0 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+
+       ' L'+x2.toFixed(1)+' '+y2.toFixed(1)+' A'+R0+' '+R0+' 0 0 0 '+x3.toFixed(1)+' '+y3.toFixed(1)+
+       ' Z" fill="'+fill(ans[i])+'" stroke="#ffffff" stroke-width="2"/>';
+    const sx=CX+((R0+R1)/2)*Math.cos(rad(am)), sy=CY+((R0+R1)/2)*Math.sin(rad(am));
+    if(ans[i]!==undefined){
+      p+='<text x="'+sx.toFixed(1)+'" y="'+(sy+6).toFixed(1)+'" text-anchor="middle" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="17" font-weight="700" fill="'+(ans[i]>=8?'#ffffff':'#14532d')+'">'+ans[i]+'</text>';
+    }
+    const lx=CX+(R1+18)*Math.cos(rad(am)), ly=CY+(R1+18)*Math.sin(rad(am));
+    const c=Math.cos(rad(am));
+    const anch=c>0.25?'start':(c<-0.25?'end':'middle');
+    const num=(i<9?'0':'')+(i+1);
+    p+='<text x="'+lx.toFixed(1)+'" y="'+(ly-4).toFixed(1)+'" text-anchor="'+anch+'" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1" fill="#8aa093">'+num+'</text>'+
+       '<text x="'+lx.toFixed(1)+'" y="'+(ly+13).toFixed(1)+'" text-anchor="'+anch+'" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="14" font-weight="600" fill="#20372a">'+QS[i].s+'</text>';
+  }
+  p+='<circle cx="'+CX+'" cy="'+CY+'" r="106" fill="#ffffff" stroke="#dfe8e2" stroke-width="2"/>'+
+     '<text x="'+CX+'" y="'+(CY-38)+'" text-anchor="middle" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2.6" fill="#4b6a58">G-CI SCORE</text>'+
+     '<text x="'+CX+'" y="'+(CY+26)+'" text-anchor="middle" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="64" font-weight="700" fill="#14532d">'+t.score+'</text>'+
+     '<text x="'+CX+'" y="'+(CY+52)+'" text-anchor="middle" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="14" font-weight="500" fill="#6b7f73">out of 100</text>';
+  if(t.adj!==0){
+    const lbl=(t.adj>0?'+':'')+t.adj+' adjustments';
+    p+='<rect x="'+(CX-88)+'" y="570" width="176" height="30" rx="15" fill="'+(t.adj>0?'#e8f3ec':'#fdecec')+'"/>'+
+       '<text x="'+CX+'" y="590" text-anchor="middle" font-family="Inter,Helvetica Neue,Arial,sans-serif" font-size="13" font-weight="700" fill="'+(t.adj>0?'#14532d':'#8f2727')+'">'+lbl+'</text>';
+  }
+  return p+'</svg>';
+}
+/*WHEEL_END*/
+
+function draw(){
+  const t=totals();
+  document.getElementById('wheel').innerHTML=wheelSVG(ans,mans,QS,MODS,t);
+  document.getElementById('answered').textContent=t.answered;
+  document.getElementById('adj').textContent=(t.adj>0?'+':'')+t.adj;
+  document.querySelector('#wheel svg').addEventListener('click',exportPNG);
+}
+
+/* ---------- export ---------- */
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2200);
+}
+function exportPNG(){
+  const svg=document.querySelector('#wheel svg');
+  const data=new XMLSerializer().serializeToString(svg);
+  const scale=5, w=700*scale, h=620*scale;
+  const img=new Image();
+  img.onload=function(){
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,h);
+    ctx.drawImage(img,0,0,w,h);
+    cv.toBlob(function(blob){
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='G-CI.png'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      if(navigator.clipboard && window.ClipboardItem){
+        navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+          .then(()=>toast('Image downloaded and copied to clipboard'))
+          .catch(()=>toast('Image downloaded'));
+      } else { toast('Image downloaded'); }
+    },'image/png');
+  };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(data);
+}
+
+document.getElementById('reset').addEventListener('click',function(){
+  Object.keys(ans).forEach(k=>delete ans[k]);
+  Object.keys(mans).forEach(k=>delete mans[k]);
+  document.querySelectorAll('.dd .lbl').forEach(l=>{l.textContent='— Select —';l.classList.add('ph');});
+  document.querySelectorAll('.ddopt').forEach(o=>o.setAttribute('aria-selected','false'));
+  draw();
+});
+
+build(); draw();
+</script>
+</body>
+</html>
