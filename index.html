@@ -22,8 +22,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Helvetica
 .wrap{max-width:1440px;margin:0 auto;padding:1.6rem 1.5rem 3rem;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:1.6rem;align-items:start}
 @media(max-width:1180px){.wrap{grid-template-columns:minmax(0,1fr)}}
 
-.qtable{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:1.1rem}
-.qghead{background:var(--green);color:#fff;padding:.8rem 1.1rem;font-size:.95rem;font-weight:700}
+.qtable{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:1.1rem}
+.qghead{background:var(--green);color:#fff;padding:.8rem 1.1rem;font-size:.95rem;font-weight:700;border-radius:13px 13px 0 0}
 .qrow{display:flex;gap:1rem;align-items:flex-start;padding:.95rem 1.1rem;border-bottom:1px solid var(--line)}
 .qrow:last-child{border-bottom:0}
 .qnum{flex:0 0 26px;height:26px;border-radius:50%;background:#eef4f0;color:var(--green);font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:.15rem}
@@ -90,7 +90,7 @@ thead th{background:#f3f7f4;font-size:.8rem;letter-spacing:.02em}
 tr.total td{font-weight:700;font-size:1rem;border-top:2px solid var(--green);border-bottom:0}
 td.cell{font-weight:700;border-radius:0}
 
-.qfoot{background:var(--green);color:#d8e8de;text-align:center;font-size:.8rem;padding:.7rem 1rem}
+.qfoot{background:var(--green);color:#d8e8de;text-align:center;font-size:.8rem;padding:.7rem 1rem;border-radius:13px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:#fff;padding:.7rem 1.1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:80}
 .toast.show{opacity:1}
 @media print{.hero,.side,.saverow,.qtable,.toast{display:none!important}.cmp{border:0;display:block!important}.wrap{display:block}}
