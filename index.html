@@ -77,23 +77,28 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,'Helvetica
 .reset{margin-top:.8rem;width:100%;background:#fff;border:1px solid #d7e0da;border-radius:10px;padding:.6rem;font:inherit;font-size:.82rem;color:var(--muted);cursor:pointer;min-height:44px}
 .reset:hover{border-color:var(--g5);color:var(--green)}
 
-.cmp{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.1rem;display:none}
+.cmp{grid-column:1/-1;position:relative;z-index:5;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.1rem;display:none}
 .cmp.open{display:block}
 .cmp h2{margin:0 0 .2rem;font-family:'Playfair Display',Georgia,serif;font-size:1.4rem}
 .cmp .sub{font-size:.85rem;color:var(--muted);margin-bottom:1rem}
-.cmpscroll{overflow-x:auto}
-.cmp svg{cursor:pointer;display:block;min-width:100%}
+.cmpscroll{overflow:visible}
+.cmp svg{cursor:pointer;display:block;width:100%;max-width:1000px;height:auto;margin:0 auto}
+#cmptable{overflow-x:auto}
 table{border-collapse:collapse;width:100%;margin-top:1.2rem;font-size:.86rem}
 th,td{padding:.5rem .6rem;text-align:center;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left;font-weight:600}
 thead th{background:#f3f7f4;font-size:.8rem;letter-spacing:.02em}
 tr.total td{font-weight:700;font-size:1rem;border-top:2px solid var(--green);border-bottom:0}
-td.cell{font-weight:700;border-radius:0}
+th.mh,td.cell{text-align:left}
+td.cell{vertical-align:middle}
+.cellin{display:flex;align-items:center;gap:.6rem}
+.pill{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 .45rem;border-radius:7px;font-weight:700;font-size:.86rem}
+.atext{font-size:.8rem;line-height:1.35;color:var(--ink)}
 
 .qfoot{background:var(--green);color:#d8e8de;text-align:center;font-size:.8rem;padding:.7rem 1rem;border-radius:13px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:#fff;padding:.7rem 1.1rem;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:80}
 .toast.show{opacity:1}
-@media print{.hero,.side,.saverow,.qtable,.toast{display:none!important}.cmp{border:0;display:block!important}.wrap{display:block}}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}#cmptable{overflow:visible}.hero,.side,.saverow,.qtable,.toast{display:none!important}.cmp{border:0;display:block!important}.wrap{display:block}}
 </style>
 </head>
 <body>
@@ -194,7 +199,7 @@ const MODS=[
  {t:"Multianalyte or multi-parameter",v:2}
 ];
 
-let ans={}, mans={}, saved=[];
+let ans={}, lab={}, mans={}, saved=[];
 
 /* ---------- build ---------- */
 function build(){
@@ -239,7 +244,7 @@ document.addEventListener('click',e=>{
   const opt=e.target.closest('.ddopt');
   if(opt){
     const i=+opt.dataset.i, oi=+opt.dataset.oi;
-    ans[i]=QS[i].o[oi][1];
+    ans[i]=QS[i].o[oi][1]; lab[i]=QS[i].o[oi][0];
     const btn=document.getElementById('dd-'+i);
     btn.querySelector('.lbl').innerHTML=QS[i].o[oi][0];
     btn.querySelector('.lbl').classList.remove('ph');
@@ -311,22 +316,25 @@ function wheelSVG(a,t){
   return p+'</svg>';
 }
 function comparisonSVG(){
-  const CW=340,H=465,W=Math.max(700,40+saved.length*CW);
+  const CW=340,BH=420,n=saved.length,per=Math.min(n,3),rows=Math.ceil(n/per);
+  const W=Math.max(700,40+per*CW),H=rows*BH+45;
   let p='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'+
         '<rect width="'+W+'" height="'+H+'" fill="#ffffff"/>';
   saved.forEach((m,k)=>{
-    const cx=20+k*CW+CW/2;
-    p+=tx(cx,44,m.name,16,700,'#102a1c');
-    p+=ring(m.ans,cx,230,72,142,13,10,false);
-    p+='<circle cx="'+cx+'" cy="230" r="68" fill="#ffffff" stroke="#dfe8e2" stroke-width="2"/>';
-    p+=tx(cx,240,m.score,44,700,'#0e4429');
-    p+=tx(cx,262,'out of 100',12,500,'#6b7f73');
-    if(m.adj!==0) p+=tx(cx,400,(m.adj>0?'+':'')+m.adj+' adjustments',13,700,m.adj>0?'#0e4429':'#8f2727');
+    const row=(k/per)|0, col=k%per, inRow=Math.min(per,n-row*per);
+    const x0=(W-inRow*CW)/2, y0=row*BH;
+    const cx=x0+col*CW+CW/2, cy=y0+230;
+    p+=tx(cx,y0+44,m.name,16,700,'#102a1c');
+    p+=ring(m.ans,cx,cy,72,142,13,10,false);
+    p+='<circle cx="'+cx+'" cy="'+cy+'" r="68" fill="#ffffff" stroke="#dfe8e2" stroke-width="2"/>';
+    p+=tx(cx,cy+10,m.score,44,700,'#0e4429');
+    p+=tx(cx,cy+32,'out of 100',12,500,'#6b7f73');
+    if(m.adj!==0) p+=tx(cx,y0+400,(m.adj>0?'+':'')+m.adj+' adjustments',13,700,m.adj>0?'#0e4429':'#8f2727');
   });
-  const step=(W-60)/5;
+  const step=(W-60)/5, ly0=rows*BH+8;
   for(let i=0;i<10;i++){
     const col=i%5, row=(i/5)|0;
-    const lx=30+col*step, ly=428+row*22;
+    const lx=30+col*step, ly=ly0+row*22;
     p+=tx(lx,ly,(i<9?'0':'')+(i+1),11,700,'#8aa093','start')+tx(lx+20,ly,QS[i].s,12,400,'#55685d','start');
   }
   return p+'</svg>';
@@ -352,11 +360,13 @@ document.addEventListener('click',e=>{
 function renderComparison(){
   document.getElementById('cmpwheels').innerHTML=comparisonSVG();
   document.querySelector('#cmpwheels svg').addEventListener('click',function(){exportPNG(this,'G-CI-comparison.png');});
-  let h='<table><thead><tr><th>Criterion</th>'+saved.map(m=>'<th>'+m.name+'</th>').join('')+'</tr></thead><tbody>';
+  let h='<table><thead><tr><th>Criterion</th>'+saved.map(m=>'<th class="mh">'+m.name+'</th>').join('')+'</tr></thead><tbody>';
   QS.forEach((q,i)=>{
     h+='<tr><td>'+q.n+'. '+q.t+'</td>'+saved.map(m=>{
       const v=m.ans[i];
-      return '<td class="cell" style="background:'+FILL(v)+';color:'+(v>=8?'#ffffff':'#123324')+'">'+(v===undefined?'—':v)+'</td>';
+      if(v===undefined) return '<td class="cell"><span class="atext" style="color:var(--muted)">—</span></td>';
+      return '<td class="cell"><div class="cellin"><span class="pill" style="background:'+FILL(v)+';color:'+(v>=8?'#ffffff':'#123324')+'">'+v+'</span>'+
+             '<span class="atext">'+((m.lab&&m.lab[i])||'')+'</span></div></td>';
     }).join('')+'</tr>';
   });
   h+='<tr><td>Adjustments</td>'+saved.map(m=>'<td>'+(m.adj>0?'+':'')+m.adj+'</td>').join('')+'</tr>';
@@ -371,7 +381,7 @@ function toast(msg){
   setTimeout(()=>el.classList.remove('show'),2200);
 }
 function clearForm(){
-  ans={}; mans={};
+  ans={}; lab={}; mans={};
   document.querySelectorAll('.dd .lbl').forEach(l=>{l.textContent='— Select —';l.classList.add('ph');});
   document.querySelectorAll('.ddopt').forEach(o=>o.setAttribute('aria-selected','false'));
   document.querySelectorAll('input[type=checkbox][data-mi]').forEach(c=>{c.checked=false;});
@@ -382,7 +392,7 @@ document.getElementById('save').addEventListener('click',function(){
   const t=totals(ans,mans);
   if(t.answered===0){ toast('Answer at least one criterion first'); return; }
   const nm=document.getElementById('aname').value.trim()||('Assessment '+(saved.length+1));
-  saved.push({name:nm,ans:Object.assign({},ans),mans:Object.assign({},mans),score:t.score,adj:t.adj,answered:t.answered});
+  saved.push({name:nm,ans:Object.assign({},ans),lab:Object.assign({},lab),mans:Object.assign({},mans),score:t.score,adj:t.adj,answered:t.answered});
   renderSaved();
   toast('“'+nm+'” saved — '+t.score+' / 100');
 });
